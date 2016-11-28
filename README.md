@@ -2,6 +2,8 @@ babycrafter by pithydon
 
 Blocks for babys.
 
+Forum: https://forum.minetest.net/viewtopic.php?t=15953
+
 Github: https://github.com/pithydon/babycrafter
 
 License for all of this mod is "CC0", see below.
