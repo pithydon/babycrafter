@@ -41,6 +41,16 @@ for _,v in ipairs({{"a",{1,0,0,0,0,0},58},{"b",{1,0,1,0,0,0},50},
 	end
 end
 
+local invimgs = ""
+for i=0,7,1 do
+	invimgs = invimgs.."image["..i..",2.85;1,1;babycrafter_formspec_hb_inv.png]"
+end
+for _,v in ipairs({"4.08","5.08","6.08"}) do
+	for i=0,7,1 do
+		invimgs = invimgs.."image["..i..","..v..";1,1;babycrafter_formspec_inv.png]"
+	end
+end
+
 for i=0,15 do
 	local node_name = "babycrafter:shape_sorter_"..i
 	local cn = 1
@@ -86,9 +96,9 @@ for i=0,15 do
 		on_construct = function(pos)
 			local meta = minetest.get_meta(pos)
 			meta:set_string("formspec", "size[8,7;]background[0,0;8,7;babycrafter_shape_sorter_formspec.png;true]"
-					.."listcolors[#00000023;#594d3869;#181413;#787e50;#fff]"
+					.."listcolors[#00000000;#594d38aa;#00000000;#787e50;#fff]"
 					.."list[context;shapes;3,0.3;2,2;]list[current_player;main;0,2.85;8,1;]list[current_player;main;0,4.08;8,3;8]"
-					.."listring[context;shapes]listring[current_player;main]"..default.get_hotbar_bg(0,2.85))
+					.."listring[context;shapes]listring[current_player;main]"..invimgs)
 			local inv = meta:get_inventory()
 			inv:set_size("shapes", 4)
 			for _,v in ipairs(consinv) do
