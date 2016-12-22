@@ -1,20 +1,33 @@
+local creative = minetest.setting_getbool("creative_mode")
+local ring_stacker_enabled = minetest.setting_getbool("babycrafter_enable_ring_stacker")
+
+local stairs_path = minetest.get_modpath("stairs")
 local treasurer_path = minetest.get_modpath("treasurer")
 
-for _,v in ipairs({{"a",{1,0,0,0,0,0},58},{"b",{1,0,1,0,0,0},50},
-		{"c",{1,1,0,0,0,0},54},{"d",{1,1,0,1,0,0},55},{"e",{1,0,0,1,0,0},59},{"f",{1,1,1,0,0,0},52},{"g",{1,1,1,1,0,0},51},
-		{"h",{1,0,1,1,0,0},56},{"i",{0,1,1,0,0,0},57},{"j",{0,1,1,1,0,0},48},{"k",{1,0,0,0,1,0},49},{"l",{1,0,1,0,1,0},54},
-		{"m",{1,1,0,0,1,0},53},{"n",{1,1,0,1,1,0},57},{"o",{1,0,0,1,1,0},58},{"p",{1,1,1,0,1,0},50},{"q",{1,1,1,1,1,0},47},
-		{"r",{1,0,1,1,1,0},55},{"s",{0,1,1,0,1,0},56},{"t",{0,1,1,1,1,0},59},{"u",{1,0,0,0,1,1},53},{"v",{1,0,1,0,1,1},49},
-		{"w",{0,1,1,1,0,1},52},{"x",{1,1,0,0,1,1},48},{"y",{1,1,0,1,1,1},51},{"z",{1,0,0,1,1,1},47}}) do
+for _,v in ipairs({{"a",{1,0,0,0,0,0},58},{"b",{1,0,1,0,0,0},41},
+		{"c",{1,1,0,0,0,0},49},{"d",{1,1,0,1,0,0},51},{"e",{1,0,0,1,0,0},60},{"f",{1,1,1,0,0,0},45},{"g",{1,1,1,1,0,0},44},
+		{"h",{1,0,1,1,0,0},53},{"i",{0,1,1,0,0,0},56},{"j",{0,1,1,1,0,0},38},{"k",{1,0,0,0,1,0},39},{"l",{1,0,1,0,1,0},50},
+		{"m",{1,1,0,0,1,0},47},{"n",{1,1,0,1,1,0},55},{"o",{1,0,0,1,1,0},57},{"p",{1,1,1,0,1,0},42},{"q",{1,1,1,1,1,0},36},
+		{"r",{1,0,1,1,1,0},52},{"s",{0,1,1,0,1,0},54},{"t",{0,1,1,1,1,0},59},{"u",{1,0,0,0,1,1},48},{"v",{1,0,1,0,1,1},40},
+		{"w",{0,1,1,1,0,1},46},{"x",{1,1,0,0,1,1},37},{"y",{1,1,0,1,1,1},43},{"z",{1,0,0,1,1,1},35}}) do
 	minetest.register_node("babycrafter:alphabet_block_"..v[1], {
 		description = "Letter "..string.upper(v[1]).." Alphabet Block",
 		drawtype = "normal",
 		paramtype2 = "facedir",
 		is_ground_content = false,
 		tiles = {"babycrafter_"..v[1]..".png"},
-		groups = {oddly_breakable_by_hand = 3, cracky = 3, flammable = 1, falling_node = 1},
-		sounds = default.node_sound_defaults(),
-		on_rotate = screwdriver.rotate_simple
+		groups = {oddly_breakable_by_hand = 3, cracky = 3, falling_node = 1},
+		sounds = {
+			footstep = {name = "", gain = 1},
+			dig = {name = "babycrafter_dig", gain = 1},
+			dug = {name = "babycrafter_dug", gain = 1},
+			place = {name = "babycrafter_place", gain = 1}
+		},
+		on_rotate = function(pos, node, user, mode, new_param2)
+			if mode ~= 1 then
+				return false
+			end
+		end
 	})
 
 	local braille = {}
@@ -42,12 +55,12 @@ for _,v in ipairs({{"a",{1,0,0,0,0,0},58},{"b",{1,0,1,0,0,0},50},
 end
 
 local invimgs = ""
-for i=0,7,1 do
+for i=0,7 do
 	invimgs = invimgs.."image["..i..",2.85;1,1;babycrafter_formspec_hb_inv.png]"
 end
-for _,v in ipairs({"4.08","5.08","6.08"}) do
-	for i=0,7,1 do
-		invimgs = invimgs.."image["..i..","..v..";1,1;babycrafter_formspec_inv.png]"
+for iy=4,6 do
+	for ix=0,7 do
+		invimgs = invimgs.."image["..ix..","..iy..".08;1,1;babycrafter_formspec_inv.png]"
 	end
 end
 
@@ -61,24 +74,35 @@ for i=0,15 do
 	local drops = {{items = {"babycrafter:shape_sorter"}, rarity = 1}}
 	local consinv = {}
 	local idrop = i
+	local itexture = {0, 0}
 	if idrop - 8 >= 0 then
 		idrop = idrop - 8
-		drops[#drops+1] = {items = {"babycrafter:red_square"}, rarity = 1}
-		consinv[#consinv+1] = {1, ItemStack("babycrafter:red_square")}
+		drops[2] = {items = {"babycrafter:red_square"}, rarity = 1}
+		consinv[1] = {1, ItemStack("babycrafter:red_square")}
+		itexture[2] = 2
 	end
 	if idrop - 4 >= 0 then
 		idrop = idrop - 4
 		drops[#drops+1] = {items = {"babycrafter:blue_circle"}, rarity = 1}
 		consinv[#consinv+1] = {2, ItemStack("babycrafter:blue_circle")}
+		itexture[2] = itexture[2] + 1
 	end
 	if idrop - 2 >= 0 then
 		idrop = idrop - 2
 		drops[#drops+1] = {items = {"babycrafter:green_triangle"}, rarity = 1}
 		consinv[#consinv+1] = {3, ItemStack("babycrafter:green_triangle")}
+		itexture[1] = 2
 	end
 	if idrop - 1 >= 0 then
 		drops[#drops+1] = {items = {"babycrafter:yellow_star"}, rarity = 1}
 		consinv[#consinv+1] = {4, ItemStack("babycrafter:yellow_star")}
+		itexture[1] = itexture[1] + 1
+	end
+	local texture
+	if itexture[1] == itexture[2] then
+		texture = "babycrafter_shape_sorter_"..itexture[1]..".png"
+	else
+		texture = "babycrafter_shape_sorter_"..itexture[2]..".png^[lowpart:50:babycrafter_shape_sorter_"..itexture[1]..".png"
 	end
 
 	minetest.register_node(node_name, {
@@ -86,9 +110,14 @@ for i=0,15 do
 		drawtype = "normal",
 		paramtype2 = "facedir",
 		is_ground_content = false,
-		tiles = {"babycrafter_shape_sorter_"..i..".png", "babycrafter_wood_block.png"},
+		tiles = {texture, "babycrafter_wood_block.png"},
 		groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, falling_node = 1, not_in_creative_inventory = cn},
-		sounds = default.node_sound_wood_defaults(),
+		sounds = {
+			footstep = {name = "", gain = 1},
+			dig = {name = "babycrafter_dig", gain = 1},
+			dug = {name = "babycrafter_dug", gain = 1},
+			place = {name = "babycrafter_place", gain = 1}
+		},
 		drop = {
 			max_items = 5,
 			items = drops
@@ -96,7 +125,7 @@ for i=0,15 do
 		on_construct = function(pos)
 			local meta = minetest.get_meta(pos)
 			meta:set_string("formspec", "size[8,7;]background[0,0;8,7;babycrafter_shape_sorter_formspec.png;true]"
-					.."listcolors[#00000000;#594d38aa;#00000000;#787e50;#fff]"
+					.."bgcolor[#bbbb;true]listcolors[#0000;#594d38aa;#0000;#787e50;#fff]"
 					.."list[context;shapes;3,0.3;2,2;]list[current_player;main;0,2.85;8,1;]list[current_player;main;0,4.08;8,3;8]"
 					.."listring[context;shapes]listring[current_player;main]"..invimgs)
 			local inv = meta:get_inventory()
@@ -107,14 +136,10 @@ for i=0,15 do
 		end,
 		allow_metadata_inventory_put = function(pos, listname, index, stack)
 			local name = stack:get_name()
-			if name == "babycrafter:red_square" and index == 1 then
-				return stack:get_count()
-			elseif name == "babycrafter:blue_circle" and index == 2 then
-				return stack:get_count()
-			elseif name == "babycrafter:green_triangle" and index == 3 then
-				return stack:get_count()
-			elseif name == "babycrafter:yellow_star" and index == 4 then
-				return stack:get_count()
+			if minetest.get_meta(pos):get_inventory():get_stack(listname, index):is_empty() and
+					((name == "babycrafter:red_square" and index == 1) or (name == "babycrafter:blue_circle" and index == 2) or
+					(name == "babycrafter:green_triangle" and index == 3) or (name == "babycrafter:yellow_star" and index == 4)) then
+				return 1
 			end
 			return 0
 		end,
@@ -143,8 +168,10 @@ for i=0,15 do
 				return
 			end
 			local node = minetest.get_node(pos)
+			local player_name = player:get_player_name()
 			minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..ni, param2 = node.param2})
-			minetest.log("action", player:get_player_name().." places a "..desc.." in a shape sorter at "..minetest.pos_to_string(pos))
+			minetest.sound_play({name = "babycrafter_slide_in", gain = 0.1}, {to_player = player_name})
+			minetest.log("action", player_name.." places a "..desc.." in a shape sorter at "..minetest.pos_to_string(pos))
 		end,
 		on_metadata_inventory_take = function(pos, listname, index, stack, player)
 			local name = stack:get_name()
@@ -172,8 +199,10 @@ for i=0,15 do
 				new_name = "babycrafter:shape_sorter"
 			end
 			local node = minetest.get_node(pos)
+			local player_name = player:get_player_name()
 			minetest.swap_node(pos, {name = new_name, param2 = node.param2})
-			minetest.log("action", player:get_player_name().." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
+			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+			minetest.log("action", player_name.." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
 		end
 	})
 end
@@ -221,9 +250,11 @@ if minetest.get_modpath("mesecons") then
 					return
 				end
 				local node = minetest.get_node(pos)
+				local player_name = player:get_player_name()
 				minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..ni, param2 = node.param2})
+				minetest.sound_play({name = "babycrafter_slide_in", gain = 0.1}, {to_player = player_name})
 				mesecon.receptor_on(pos, mesecon.rules.alldirs)
-				minetest.log("action", player:get_player_name().." places a "..desc.." in a shape sorter at "..minetest.pos_to_string(pos))
+				minetest.log("action", player_name.." places a "..desc.." in a shape sorter at "..minetest.pos_to_string(pos))
 			end
 		})
 	end
@@ -254,9 +285,11 @@ if minetest.get_modpath("mesecons") then
 				return
 			end
 			local node = minetest.get_node(pos)
+			local player_name = player:get_player_name()
 			minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..ni, param2 = node.param2})
+			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
 			mesecon.receptor_off(pos, mesecon.rules.alldirs)
-			minetest.log("action", player:get_player_name().." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
+			minetest.log("action", player_name.." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
 		end
 	})
 end
@@ -267,8 +300,348 @@ minetest.register_node("babycrafter:wood_block", {
 	is_ground_content = false,
 	tiles = {"babycrafter_wood_block.png"},
 	groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1},
-	sounds = default.node_sound_wood_defaults()
+	sounds = {
+		footstep = {name = "", gain = 1},
+		dig = {name = "babycrafter_dig", gain = 1},
+		dug = {name = "babycrafter_dug", gain = 1},
+		place = {name = "babycrafter_place", gain = 1}
+	}
 })
+
+if stairs_path then
+	stairs.register_stair_and_slab("wood_block", "babycrafter:wood_block",
+			{oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, falling_node = 1}, {"babycrafter_wood_block.png"}, "Wood Block Stair", "Wood Block Slab",
+			{footstep = {name = "", gain = 1}, dig = {name = "babycrafter_dig", gain = 1}, dug = {name = "babycrafter_dug", gain = 1},
+			place = {name = "babycrafter_place", gain = 1}})
+end
+
+local color_index = {
+	{"white"},
+	{"grey", "#aaa"},
+	{"dark_grey", "#555"},
+	{"black"},
+	{"violet", "#50a"},
+	{"blue"},
+	{"cyan"},
+	{"dark_green", "green"},
+	{"green", "#0f0"},
+	{"yellow"},
+	{"brown", "#530"},
+	{"orange"},
+	{"red"},
+	{"magenta"},
+	{"pink"}
+}
+
+if ring_stacker_enabled ~= false then
+	minetest.register_node("babycrafter:ring_stacker", {
+		description = "Ring Stacker",
+		drawtype = "nodebox",
+		paramtype = "light",
+		is_ground_content = false,
+		node_box = {
+			type = "fixed",
+			fixed = {
+				{-0.5, -0.5, -0.5, 0.5, -0.25, 0.5},
+				{-0.1875, -0.25, -0.1875, 0.1875, 0.5, 0.1875}
+			}
+		},
+		tiles = {"babycrafter_wood_block.png"},
+		groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1},
+		sounds = {
+			footstep = {name = "", gain = 1},
+			dig = {name = "", gain = 1},
+			dug = {name = "babycrafter_dug", gain = 1},
+			place = {name = "babycrafter_place", gain = 1}
+		},
+		on_rightclick = function(pos, node, clicker, itemstack)
+			local player_name = clicker:get_player_name()
+			local item = itemstack:get_name()
+			for _,v in ipairs(color_index) do
+				if item == "babycrafter:ring_"..v[1] then
+					minetest.log("action", player_name.." places babycrafter:ring_"..v[1].." on a ring stacker at "..minetest.pos_to_string(pos))
+					minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1]})
+					minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+					if not creative then
+						itemstack:take_item()
+						return itemstack
+					end
+					break
+				end
+			end
+		end
+	})
+
+	minetest.register_craft({
+		output = "babycrafter:ring_stacker",
+		recipe = {
+			{"group:stick"},
+			{"babycrafter:wood_block"}
+		}
+	})
+end
+
+local texture_cut = function(texture, cut_def)
+	for _,v in ipairs(cut_def) do
+		texture = texture.."^[combine:16x16:"..v.."=babycrafter_cut.png"
+	end
+	texture = "(("..texture..")^[makealpha:255,0,255)"
+	return texture
+end
+
+for _,v in ipairs(color_index) do
+	local upv
+	for i,v in ipairs(v[1]:split("_")) do
+		if i == 1 then
+			upv = v:gsub("^%l", string.upper)
+		else
+			upv = upv.." "..v:gsub("^%l", string.upper)
+		end
+	end
+
+	minetest.register_node("babycrafter:wood_block_"..v[1], {
+		description = upv.." Wood Block",
+		drawtype = "normal",
+		is_ground_content = false,
+		tiles = {"babycrafter_wood_block.png^[colorize:"..v[#v]..":174"},
+		groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1},
+		sounds = {
+			footstep = {name = "", gain = 1},
+			dig = {name = "babycrafter_dig", gain = 1},
+			dug = {name = "babycrafter_dug", gain = 1},
+			place = {name = "babycrafter_place", gain = 1}
+		}
+	})
+
+	if stairs_path then
+		stairs.register_stair_and_slab("wood_block_"..v[1], "babycrafter:wood_block_"..v[1],
+				{oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, falling_node = 1}, {"babycrafter_wood_block.png^[colorize:"..v[#v]..":174"},
+				upv.." Wood Block Stair", upv.." Wood Block Slab", {footstep = {name = "", gain = 1}, dig = {name = "babycrafter_dig", gain = 1},
+				dug = {name = "babycrafter_dug", gain = 1}, place = {name = "babycrafter_place", gain = 1}})
+	end
+
+	if ring_stacker_enabled ~= false then
+		minetest.register_node("babycrafter:ring_"..v[1], {
+			description = upv.." Ring",
+			drawtype = "nodebox",
+			paramtype = "light",
+			is_ground_content = false,
+			node_box = {
+				type = "fixed",
+				fixed = {
+					{-0.1875, -0.5, 0.1875, 0.5, -0.25, 0.5},
+					{-0.5, -0.5, -0.1875, -0.1875, -0.25, 0.5},
+					{-0.5, -0.5, -0.5, 0.1875, -0.25, -0.1875},
+					{0.1875, -0.5, -0.5, 0.5, -0.25, 0.1875}
+				}
+			},
+			selection_box = {
+				type = "fixed",
+				fixed = {{-0.5, -0.5, -0.5, 0.5, -0.25, 0.5}}
+			},
+			tiles = {"babycrafter_ring.png^[colorize:"..v[#v]..":223", "babycrafter_ring.png^[colorize:"..v[#v]..":223",
+					"babycrafter_ring_side.png^[colorize:"..v[#v]..":223"},
+			inventory_image = "babycrafter_ring.png^[colorize:"..v[#v]..":223",
+			groups = {dig_immediate = 3, falling_node = 1},
+			sounds = {
+				footstep = {name = "", gain = 1},
+				dig = {name = "", gain = 1},
+				dug = {name = "babycrafter_place_ring", gain = 0.2},
+				place = {name = "babycrafter_place_ring", gain = 0.8}
+			}
+		})
+
+		local ring1t = texture_cut("babycrafter_ring_side.png^[colorize:"..v[#v]..":223", {"0,-8", "0,12"})
+		minetest.register_node("babycrafter:ring_stacker_"..v[1], {
+			description = "Ring Stacker",
+			drawtype = "nodebox",
+			paramtype = "light",
+			is_ground_content = false,
+			node_box = {
+				type = "fixed",
+				fixed = {
+					{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
+					{-0.1875, 0, -0.1875, 0.1875, 0.5, 0.1875}
+				}
+			},
+			tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v[#v]..":223)", "babycrafter_wood_block.png",
+					"babycrafter_wood_block.png^"..ring1t},
+			groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
+			sounds = {
+				footstep = {name = "", gain = 1},
+				dig = {name = "", gain = 1},
+				dug = {name = "babycrafter_dug", gain = 1},
+				place = {name = "babycrafter_place", gain = 1}
+			},
+			drop = {
+				max_items = 2,
+				items = {
+					{items = {"babycrafter:ring_stacker"}, rarity = 1},
+					{items = {"babycrafter:ring_"..v[1]}, rarity = 1}
+				}
+			},
+			on_punch = function(pos, node, puncher)
+				local player_name = puncher:get_player_name()
+				minetest.log("action", player_name.." takes babycrafter:ring_"..v[1].." from a ring stacker at "..minetest.pos_to_string(pos))
+				minetest.swap_node(pos, {name = "babycrafter:ring_stacker"})
+				minetest.sound_play({name = "babycrafter_place_ring", gain = 0.6}, {to_player = player_name})
+				minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+				local inv = puncher:get_inventory()
+				if creative then
+					if not inv:contains_item("main", "babycrafter:ring_"..v[1]) then
+						inv:add_item("main", "babycrafter:ring_"..v[1])
+					end
+				else
+					inv:add_item("main", "babycrafter:ring_"..v[1])
+				end
+			end,
+			on_rightclick = function(pos, node, clicker, itemstack)
+				local player_name = clicker:get_player_name()
+				local item = itemstack:get_name()
+				for _,v2 in ipairs(color_index) do
+					if item == "babycrafter:ring_"..v2[1] then
+						minetest.log("action", player_name.." places babycrafter:ring_"..v2[1].." on a ring stacker at "..minetest.pos_to_string(pos))
+						minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1].."_"..v2[1]})
+						minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+						if not creative then
+							itemstack:take_item()
+							return itemstack
+						end
+						break
+					end
+				end
+			end
+		})
+		for _,v2 in ipairs(color_index) do
+			local ring2t = texture_cut("babycrafter_ring_side.png^[colorize:"..v2[#v2]..":223", {"0,-12", "0,8"})
+			minetest.register_node("babycrafter:ring_stacker_"..v[1].."_"..v2[1], {
+				description = "Ring Stacker",
+				drawtype = "nodebox",
+				paramtype = "light",
+				is_ground_content = false,
+				node_box = {
+					type = "fixed",
+					fixed = {
+						{-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+						{-0.1875, 0.25, -0.1875, 0.1875, 0.5, 0.1875}
+					}
+				},
+				tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v2[#v2]..":223)", "babycrafter_wood_block.png",
+						"babycrafter_wood_block.png^"..ring1t.."^"..ring2t},
+				groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
+				sounds = {
+					footstep = {name = "", gain = 1},
+					dig = {name = "", gain = 1},
+					dug = {name = "babycrafter_dug", gain = 1},
+					place = {name = "babycrafter_place", gain = 1}
+				},
+				drop = {
+					max_items = 3,
+					items = {
+						{items = {"babycrafter:ring_stacker"}, rarity = 1},
+						{items = {"babycrafter:ring_"..v[1]}, rarity = 1},
+						{items = {"babycrafter:ring_"..v2[1]}, rarity = 1}
+					}
+				},
+				on_punch = function(pos, node, puncher)
+					local player_name = puncher:get_player_name()
+					minetest.log("action", player_name.." takes babycrafter:ring_"..v2[1].." from a ring stacker at "..minetest.pos_to_string(pos))
+					minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1]})
+					minetest.sound_play({name = "babycrafter_place_ring", gain = 0.8}, {to_player = player_name})
+					minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+					local inv = puncher:get_inventory()
+					if creative then
+						if not inv:contains_item("main", "babycrafter:ring_"..v2[1]) then
+							inv:add_item("main", "babycrafter:ring_"..v2[1])
+						end
+					else
+						inv:add_item("main", "babycrafter:ring_"..v2[1])
+					end
+				end,
+				on_rightclick = function(pos, node, clicker, itemstack)
+					local player_name = clicker:get_player_name()
+					local item = itemstack:get_name()
+					for _,v3 in ipairs(color_index) do
+						if item == "babycrafter:ring_"..v3[1] then
+							minetest.log("action", player_name.." places babycrafter:ring_"..v3[1].." on a ring stacker at "..minetest.pos_to_string(pos))
+							minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1].."_"..v2[1].."_"..v3[1]})
+							minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+							if not creative then
+								itemstack:take_item()
+								return itemstack
+							end
+							break
+						end
+					end
+				end
+			})
+			for _,v3 in ipairs(color_index) do
+				local ring3t = texture_cut("babycrafter_ring_side.png^[colorize:"..v3[#v3]..":223", {"0,4"})
+				minetest.register_node("babycrafter:ring_stacker_"..v[1].."_"..v2[1].."_"..v3[1], {
+					description = "Ring Stacker",
+					drawtype = "normal",
+					paramtype = "light",
+					is_ground_content = false,
+					tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v3[#v3]..":223)", "babycrafter_wood_block.png",
+							"babycrafter_wood_block.png^"..ring1t.."^"..ring2t.."^"..ring3t},
+					groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
+					sounds = {
+						footstep = {name = "", gain = 1},
+						dig = {name = "", gain = 1},
+						dug = {name = "babycrafter_dug", gain = 1},
+						place = {name = "babycrafter_place", gain = 1}
+					},
+					drop = {
+						max_items = 4,
+						items = {
+							{items = {"babycrafter:ring_stacker"}, rarity = 1},
+							{items = {"babycrafter:ring_"..v[1]}, rarity = 1},
+							{items = {"babycrafter:ring_"..v2[1]}, rarity = 1},
+							{items = {"babycrafter:ring_"..v3[1]}, rarity = 1}
+						}
+					},
+					on_punch = function(pos, node, puncher)
+						local player_name = puncher:get_player_name()
+						minetest.log("action", player_name.." takes babycrafter:ring_"..v3[1].." from a ring stacker at "..minetest.pos_to_string(pos))
+						minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1].."_"..v2[1]})
+						minetest.sound_play({name = "babycrafter_place_ring", gain = 0.8}, {to_player = player_name})
+						minetest.sound_play({name = "babycrafter_slide_out", gain = 0.04}, {to_player = player_name})
+						local inv = puncher:get_inventory()
+						if creative then
+							if not inv:contains_item("main", "babycrafter:ring_"..v3[1]) then
+								inv:add_item("main", "babycrafter:ring_"..v3[1])
+							end
+						else
+							inv:add_item("main", "babycrafter:ring_"..v3[1])
+						end
+					end
+				})
+			end
+		end
+
+		minetest.register_craft({
+			output = "babycrafter:ring_"..v[1],
+			recipe = {
+				{"default:clay_lump", "default:clay_lump", "default:clay_lump"},
+				{"default:clay_lump", "dye:"..v[1], "default:clay_lump"},
+				{"default:clay_lump", "default:clay_lump", "default:clay_lump"}
+			}
+		})
+	end
+
+	minetest.register_craft({
+		type = "shapeless",
+		output = "babycrafter:wood_block_"..v[1],
+		recipe = {"babycrafter:wood_block", "dye:"..v[1]}
+	})
+
+	if treasurer_path then
+		treasurer.register_treasure("babycrafter:wood_block_"..v[1],0.001,2,{1,20},nil,"building_block")
+		if ring_stacker_enabled ~= false then
+			treasurer.register_treasure("babycrafter:ring_"..v[1],0.0002,2,1,nil,"deco")
+		end
+	end
+end
 
 minetest.register_craftitem("babycrafter:red_square", {
 	description = "Red Square",
@@ -297,8 +670,8 @@ minetest.register_craftitem("babycrafter:yellow_star", {
 minetest.register_craft({
 	output = "babycrafter:wood_block 4",
 	recipe = {
-		{"default:aspen_wood", "default:aspen_wood"},
-		{"default:aspen_wood", "default:aspen_wood"}
+		{"group:wood", "group:wood"},
+		{"group:wood", "group:wood"}
 	}
 })
 
@@ -352,9 +725,12 @@ minetest.register_craft({
 
 if treasurer_path then
 	treasurer.register_treasure("babycrafter:wood_block",0.006,2,{1,20},nil,"building_block")
-	treasurer.register_treasure("babycrafter:shape_sorter",0.002,5,1,nil,"deco")
+	treasurer.register_treasure("babycrafter:shape_sorter",0.002,4,1,nil,"deco")
 	treasurer.register_treasure("babycrafter:red_square",0.002,2,1)
 	treasurer.register_treasure("babycrafter:blue_circle",0.002,2,1)
 	treasurer.register_treasure("babycrafter:green_triangle",0.002,2,1)
 	treasurer.register_treasure("babycrafter:yellow_star",0.002,2,1)
+	if ring_stacker_enabled ~= false then
+		treasurer.register_treasure("babycrafter:ring_stacker",0.002,4,1,nil,"deco")
+	end
 end
