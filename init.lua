@@ -333,7 +333,7 @@ local color_index = {
 	{"pink"}
 }
 
-if ring_stacker_enabled ~= false then
+if ring_stacker_enabled == true then
 	minetest.register_node("babycrafter:ring_stacker", {
 		description = "Ring Stacker",
 		drawtype = "nodebox",
@@ -420,37 +420,37 @@ for _,v in ipairs(color_index) do
 				dug = {name = "babycrafter_dug", gain = 1}, place = {name = "babycrafter_place", gain = 1}})
 	end
 
-	if ring_stacker_enabled ~= false then
-		minetest.register_node("babycrafter:ring_"..v[1], {
-			description = upv.." Ring",
-			drawtype = "nodebox",
-			paramtype = "light",
-			is_ground_content = false,
-			node_box = {
-				type = "fixed",
-				fixed = {
-					{-0.1875, -0.5, 0.1875, 0.5, -0.25, 0.5},
-					{-0.5, -0.5, -0.1875, -0.1875, -0.25, 0.5},
-					{-0.5, -0.5, -0.5, 0.1875, -0.25, -0.1875},
-					{0.1875, -0.5, -0.5, 0.5, -0.25, 0.1875}
-				}
-			},
-			selection_box = {
-				type = "fixed",
-				fixed = {{-0.5, -0.5, -0.5, 0.5, -0.25, 0.5}}
-			},
-			tiles = {"babycrafter_ring.png^[colorize:"..v[#v]..":223", "babycrafter_ring.png^[colorize:"..v[#v]..":223",
-					"babycrafter_ring_side.png^[colorize:"..v[#v]..":223"},
-			inventory_image = "babycrafter_ring.png^[colorize:"..v[#v]..":223",
-			groups = {dig_immediate = 3, falling_node = 1},
-			sounds = {
-				footstep = {name = "", gain = 1},
-				dig = {name = "", gain = 1},
-				dug = {name = "babycrafter_place_ring", gain = 0.2},
-				place = {name = "babycrafter_place_ring", gain = 0.8}
+	minetest.register_node("babycrafter:ring_"..v[1], {
+		description = upv.." Ring",
+		drawtype = "nodebox",
+		paramtype = "light",
+		is_ground_content = false,
+		node_box = {
+			type = "fixed",
+			fixed = {
+				{-0.1875, -0.5, 0.1875, 0.5, -0.25, 0.5},
+				{-0.5, -0.5, -0.1875, -0.1875, -0.25, 0.5},
+				{-0.5, -0.5, -0.5, 0.1875, -0.25, -0.1875},
+				{0.1875, -0.5, -0.5, 0.5, -0.25, 0.1875}
 			}
-		})
+		},
+		selection_box = {
+			type = "fixed",
+			fixed = {{-0.5, -0.5, -0.5, 0.5, -0.25, 0.5}}
+		},
+		tiles = {"babycrafter_ring.png^[colorize:"..v[#v]..":223", "babycrafter_ring.png^[colorize:"..v[#v]..":223",
+				"babycrafter_ring_side.png^[colorize:"..v[#v]..":223"},
+		inventory_image = "babycrafter_ring.png^[colorize:"..v[#v]..":223",
+		groups = {dig_immediate = 3, falling_node = 1},
+		sounds = {
+			footstep = {name = "", gain = 1},
+			dig = {name = "", gain = 1},
+			dug = {name = "babycrafter_place_ring", gain = 0.2},
+			place = {name = "babycrafter_place_ring", gain = 0.8}
+		}
+	})
 
+	if ring_stacker_enabled == true then
 		local ring1t = texture_cut("babycrafter_ring_side.png^[colorize:"..v[#v]..":223", {"0,-8", "0,12"})
 		minetest.register_node("babycrafter:ring_stacker_"..v[1], {
 			description = "Ring Stacker",
@@ -618,16 +618,16 @@ for _,v in ipairs(color_index) do
 				})
 			end
 		end
-
-		minetest.register_craft({
-			output = "babycrafter:ring_"..v[1],
-			recipe = {
-				{"default:clay_lump", "default:clay_lump", "default:clay_lump"},
-				{"default:clay_lump", "dye:"..v[1], "default:clay_lump"},
-				{"default:clay_lump", "default:clay_lump", "default:clay_lump"}
-			}
-		})
 	end
+
+	minetest.register_craft({
+		output = "babycrafter:ring_"..v[1],
+		recipe = {
+			{"default:clay_lump", "default:clay_lump", "default:clay_lump"},
+			{"default:clay_lump", "dye:"..v[1], "default:clay_lump"},
+			{"default:clay_lump", "default:clay_lump", "default:clay_lump"}
+		}
+	})
 
 	minetest.register_craft({
 		type = "shapeless",
@@ -637,9 +637,7 @@ for _,v in ipairs(color_index) do
 
 	if treasurer_path then
 		treasurer.register_treasure("babycrafter:wood_block_"..v[1],0.001,2,{1,20},nil,"building_block")
-		if ring_stacker_enabled ~= false then
-			treasurer.register_treasure("babycrafter:ring_"..v[1],0.0002,2,1,nil,"deco")
-		end
+		treasurer.register_treasure("babycrafter:ring_"..v[1],0.0002,2,1,nil,"deco")
 	end
 end
 
@@ -730,7 +728,7 @@ if treasurer_path then
 	treasurer.register_treasure("babycrafter:blue_circle",0.002,2,1)
 	treasurer.register_treasure("babycrafter:green_triangle",0.002,2,1)
 	treasurer.register_treasure("babycrafter:yellow_star",0.002,2,1)
-	if ring_stacker_enabled ~= false then
+	if ring_stacker_enabled == true then
 		treasurer.register_treasure("babycrafter:ring_stacker",0.002,4,1,nil,"deco")
 	end
 end
