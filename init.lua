@@ -2,6 +2,7 @@ local creative = minetest.setting_getbool("creative_mode")
 local ring_stacker_enabled = minetest.setting_getbool("babycrafter_enable_ring_stacker")
 
 local stairs_path = minetest.get_modpath("stairs")
+local mcstair_path = minetest.get_modpath("mcstair")
 local treasurer_path = minetest.get_modpath("treasurer")
 
 for _,v in ipairs({{"a",{1,0,0,0,0,0},58},{"b",{1,0,1,0,0,0},41},
@@ -150,16 +151,16 @@ for i=0,15 do
 			local name = stack:get_name()
 			local desc
 			local ni
-			if name == "babycrafter:red_square" then
+			if name == "babycrafter:red_square" and index == 1 then
 				desc = "red square"
 				ni = i + 8
-			elseif name == "babycrafter:blue_circle" then
+			elseif name == "babycrafter:blue_circle" and index == 2 then
 				desc = "blue circle"
 				ni = i + 4
-			elseif name == "babycrafter:green_triangle" then
+			elseif name == "babycrafter:green_triangle" and index == 3 then
 				desc = "green triangle"
 				ni = i + 2
-			elseif name == "babycrafter:yellow_star" then
+			elseif name == "babycrafter:yellow_star" and index == 4 then
 				desc = "yellow star"
 				ni = i + 1
 			else
@@ -177,16 +178,16 @@ for i=0,15 do
 			local name = stack:get_name()
 			local desc
 			local ni
-			if name == "babycrafter:red_square" then
+			if name == "babycrafter:red_square" and index == 1 then
 				desc = "a red square"
 				ni = i - 8
-			elseif name == "babycrafter:blue_circle" then
+			elseif name == "babycrafter:blue_circle" and index == 2 then
 				desc = "a blue circle"
 				ni = i - 4
-			elseif name == "babycrafter:green_triangle" then
+			elseif name == "babycrafter:green_triangle" and index == 3 then
 				desc = "a green triangle"
 				ni = i - 2
-			elseif name == "babycrafter:yellow_star" then
+			elseif name == "babycrafter:yellow_star" and index == 4 then
 				desc = "a yellow star"
 				ni = i - 1
 			else
@@ -232,16 +233,16 @@ if minetest.get_modpath("mesecons") then
 				local name = stack:get_name()
 				local desc
 				local ni
-				if name == "babycrafter:red_square" then
+				if name == "babycrafter:red_square" and index == 1 then
 					desc = "red square"
 					ni = v + 8
-				elseif name == "babycrafter:blue_circle" then
+				elseif name == "babycrafter:blue_circle" and index == 2 then
 					desc = "blue circle"
 					ni = v + 4
-				elseif name == "babycrafter:green_triangle" then
+				elseif name == "babycrafter:green_triangle" and index == 3 then
 					desc = "green triangle"
 					ni = v + 2
-				elseif name == "babycrafter:yellow_star" then
+				elseif name == "babycrafter:yellow_star" and index == 4 then
 					desc = "yellow star"
 					ni = v + 1
 				else
@@ -267,16 +268,16 @@ if minetest.get_modpath("mesecons") then
 			local name = stack:get_name()
 			local desc
 			local ni = 15
-			if name == "babycrafter:red_square" then
+			if name == "babycrafter:red_square" and index == 1 then
 				desc = "a red square"
 				ni = ni - 8
-			elseif name == "babycrafter:blue_circle" then
+			elseif name == "babycrafter:blue_circle" and index == 2 then
 				desc = "a blue circle"
 				ni = ni - 4
-			elseif name == "babycrafter:green_triangle" then
+			elseif name == "babycrafter:green_triangle" and index == 3 then
 				desc = "a green triangle"
 				ni = ni - 2
-			elseif name == "babycrafter:yellow_star" then
+			elseif name == "babycrafter:yellow_star" and index == 4 then
 				desc = "a yellow star"
 				ni = ni - 1
 			else
@@ -313,6 +314,9 @@ if stairs_path then
 			{oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, falling_node = 1}, {"babycrafter_wood_block.png"}, "Wood Block Stair", "Wood Block Slab",
 			{footstep = {name = "", gain = 1}, dig = {name = "babycrafter_dig", gain = 1}, dug = {name = "babycrafter_dug", gain = 1},
 			place = {name = "babycrafter_place", gain = 1}})
+	if mcstair_path then
+		mcstair.register("wood_block")
+	end
 end
 
 local color_index = {
@@ -381,14 +385,6 @@ if ring_stacker_enabled == true then
 	})
 end
 
-local texture_cut = function(texture, cut_def)
-	for _,v in ipairs(cut_def) do
-		texture = texture.."^[combine:16x16:"..v.."=babycrafter_cut.png"
-	end
-	texture = "(("..texture..")^[makealpha:255,0,255)"
-	return texture
-end
-
 for _,v in ipairs(color_index) do
 	local upv
 	for i,v in ipairs(v[1]:split("_")) do
@@ -418,6 +414,9 @@ for _,v in ipairs(color_index) do
 				{oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, falling_node = 1}, {"babycrafter_wood_block.png^[colorize:"..v[#v]..":174"},
 				upv.." Wood Block Stair", upv.." Wood Block Slab", {footstep = {name = "", gain = 1}, dig = {name = "babycrafter_dig", gain = 1},
 				dug = {name = "babycrafter_dug", gain = 1}, place = {name = "babycrafter_place", gain = 1}})
+		if mcstair_path then
+			mcstair.register("wood_block_"..v[1])
+		end
 	end
 
 	minetest.register_node("babycrafter:ring_"..v[1], {
@@ -451,7 +450,6 @@ for _,v in ipairs(color_index) do
 	})
 
 	if ring_stacker_enabled == true then
-		local ring1t = texture_cut("babycrafter_ring_side.png^[colorize:"..v[#v]..":223", {"0,-8", "0,12"})
 		minetest.register_node("babycrafter:ring_stacker_"..v[1], {
 			description = "Ring Stacker",
 			drawtype = "nodebox",
@@ -465,7 +463,7 @@ for _,v in ipairs(color_index) do
 				}
 			},
 			tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v[#v]..":223)", "babycrafter_wood_block.png",
-					"babycrafter_wood_block.png^"..ring1t},
+					"babycrafter_wood_block.png^[lowpart:50:babycrafter_ring_side.png\\^[colorize\\:"..v[#v].."\\:223^[lowpart:25:babycrafter_wood_block.png"},
 			groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
 			sounds = {
 				footstep = {name = "", gain = 1},
@@ -513,7 +511,6 @@ for _,v in ipairs(color_index) do
 			end
 		})
 		for _,v2 in ipairs(color_index) do
-			local ring2t = texture_cut("babycrafter_ring_side.png^[colorize:"..v2[#v2]..":223", {"0,-12", "0,8"})
 			minetest.register_node("babycrafter:ring_stacker_"..v[1].."_"..v2[1], {
 				description = "Ring Stacker",
 				drawtype = "nodebox",
@@ -527,7 +524,8 @@ for _,v in ipairs(color_index) do
 					}
 				},
 				tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v2[#v2]..":223)", "babycrafter_wood_block.png",
-						"babycrafter_wood_block.png^"..ring1t.."^"..ring2t},
+						"babycrafter_wood_block.png^[lowpart:75:babycrafter_ring_side.png\\^[colorize\\:"..v2[#v2]..
+						"\\:223^[lowpart:50:babycrafter_ring_side.png\\^[colorize\\:"..v[#v].."\\:223^[lowpart:25:babycrafter_wood_block.png"},
 				groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
 				sounds = {
 					footstep = {name = "", gain = 1},
@@ -576,14 +574,14 @@ for _,v in ipairs(color_index) do
 				end
 			})
 			for _,v3 in ipairs(color_index) do
-				local ring3t = texture_cut("babycrafter_ring_side.png^[colorize:"..v3[#v3]..":223", {"0,4"})
 				minetest.register_node("babycrafter:ring_stacker_"..v[1].."_"..v2[1].."_"..v3[1], {
 					description = "Ring Stacker",
 					drawtype = "normal",
 					paramtype = "light",
 					is_ground_content = false,
 					tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v3[#v3]..":223)", "babycrafter_wood_block.png",
-							"babycrafter_wood_block.png^"..ring1t.."^"..ring2t.."^"..ring3t},
+							"babycrafter_ring_side.png^[colorize:"..v3[#v3]..":223^[lowpart:75:babycrafter_ring_side.png\\^[colorize\\:"..v2[#v2]..
+							"\\:223^[lowpart:50:babycrafter_ring_side.png\\^[colorize\\:"..v[#v].."\\:223^[lowpart:25:babycrafter_wood_block.png"},
 					groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
 					sounds = {
 						footstep = {name = "", gain = 1},

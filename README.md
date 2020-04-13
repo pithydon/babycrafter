@@ -1,4 +1,4 @@
-babycrafter v1.0.1
+babycrafter
 
 Blocks for babys.
 
