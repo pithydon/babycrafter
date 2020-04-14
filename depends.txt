@@ -1,4 +1,0 @@
-mcstair?
-mesecons?
-stairs?
-treasurer?

@@ -1,2 +1,0 @@
-# Register the Ring Stacker. Registers 3616 nodes.
-babycrafter_enable_ring_stacker (Ring Stacker) bool false

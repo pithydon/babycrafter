@@ -323,9 +323,9 @@ local color_index = {
 	{"white"},
 	{"grey", "#aaa"},
 	{"dark_grey", "#555"},
-	{"black"},
+	{"black", "#1a1a1a"},
 	{"violet", "#50a"},
-	{"blue"},
+	{"blue", "#22f"},
 	{"cyan"},
 	{"dark_green", "green"},
 	{"green", "#0f0"},
@@ -337,53 +337,111 @@ local color_index = {
 	{"pink"}
 }
 
-if ring_stacker_enabled == true then
-	minetest.register_node("babycrafter:ring_stacker", {
-		description = "Ring Stacker",
-		drawtype = "nodebox",
-		paramtype = "light",
-		is_ground_content = false,
-		node_box = {
-			type = "fixed",
-			fixed = {
-				{-0.5, -0.5, -0.5, 0.5, -0.25, 0.5},
-				{-0.1875, -0.25, -0.1875, 0.1875, 0.5, 0.1875}
-			}
-		},
-		tiles = {"babycrafter_wood_block.png"},
-		groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1},
-		sounds = {
-			footstep = {name = "", gain = 1},
-			dig = {name = "", gain = 1},
-			dug = {name = "babycrafter_dug", gain = 1},
-			place = {name = "babycrafter_place", gain = 1}
-		},
-		on_rightclick = function(pos, node, clicker, itemstack)
-			local player_name = clicker:get_player_name()
-			local item = itemstack:get_name()
-			for _,v in ipairs(color_index) do
-				if item == "babycrafter:ring_"..v[1] then
-					minetest.log("action", player_name.." places babycrafter:ring_"..v[1].." on a ring stacker at "..minetest.pos_to_string(pos))
-					minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1]})
-					minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
-					if not creative then
-						itemstack:take_item()
-						return itemstack
-					end
-					break
+minetest.register_node("babycrafter:ring_stacker", {
+	description = "Ring Stacker",
+	drawtype = "nodebox",
+	paramtype = "light",
+	is_ground_content = false,
+	node_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -0.5, -0.5, 0.5, -0.25, 0.5},
+			{-0.1875, -0.25, -0.1875, 0.1875, 0.5, 0.1875}
+		}
+	},
+	tiles = {"babycrafter_wood_block.png"},
+	groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1},
+	sounds = {
+		footstep = {name = "", gain = 1},
+		dig = {name = "", gain = 1},
+		dug = {name = "babycrafter_dug", gain = 1},
+		place = {name = "babycrafter_place", gain = 1}
+	},
+	on_rightclick = function(pos, node, clicker, itemstack)
+		local player_name = clicker:get_player_name()
+		local item = itemstack:get_name()
+		for i,v in ipairs(color_index) do
+			if item == "babycrafter:ring_"..v[1] then
+				minetest.log("action", player_name.." places babycrafter:ring_"..v[1].." on a ring stacker at "..minetest.pos_to_string(pos))
+				minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color", param2 = i - 1})
+				minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+				if not creative then
+					itemstack:take_item()
+					return itemstack
 				end
+				break
 			end
 		end
-	})
+	end
+})
 
-	minetest.register_craft({
-		output = "babycrafter:ring_stacker",
-		recipe = {
-			{"group:stick"},
-			{"babycrafter:wood_block"}
+minetest.register_node("babycrafter:ring_stacker_color", {
+	description = "Ring Stacker",
+	drawtype = "nodebox",
+	paramtype = "light",
+	paramtype2 = "color",
+	is_ground_content = false,
+	node_box = {
+		type = "fixed",
+		fixed = {
+			{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
+			{-0.1875, 0, -0.1875, 0.1875, 0.5, 0.1875}
 		}
-	})
-end
+	},
+	tiles = {{name = "babycrafter_wood_block.png", color = "white"}},
+	overlay_tiles = {"babycrafter_ring.png", "", "babycrafter_ring_side_1.png"},
+	palette = "babycrafter_palette.png",
+	groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
+	sounds = {
+		footstep = {name = "", gain = 1},
+		dig = {name = "", gain = 1},
+		dug = {name = "babycrafter_dug", gain = 1},
+		place = {name = "babycrafter_place", gain = 1}
+	},
+	on_punch = function(pos, node, puncher)
+		if node.param2 > 14 then
+			return
+		end
+		local player_name = puncher:get_player_name()
+		local color = color_index[node.param2 + 1]
+		minetest.log("action", player_name.." takes babycrafter:ring_"..color[1].." from a ring stacker at "..minetest.pos_to_string(pos))
+		minetest.swap_node(pos, {name = "babycrafter:ring_stacker"})
+		minetest.sound_play({name = "babycrafter_place_ring", gain = 0.6}, {to_player = player_name})
+		minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+		local inv = puncher:get_inventory()
+		if creative then
+			if not inv:contains_item("main", "babycrafter:ring_"..color[1]) then
+				inv:add_item("main", "babycrafter:ring_"..color[1])
+			end
+		else
+			inv:add_item("main", "babycrafter:ring_"..color[1])
+		end
+	end,
+	on_rightclick = function(pos, node, clicker, itemstack)
+		local player_name = clicker:get_player_name()
+		local item = itemstack:get_name()
+		for _,v in ipairs(color_index) do
+			if item == "babycrafter:ring_"..v[1] then
+				minetest.log("action", player_name.." places babycrafter:ring_"..v[1].." on a ring stacker at "..minetest.pos_to_string(pos))
+				minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color_"..v[1], param2 = node.param2})
+				minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+				if not creative then
+					itemstack:take_item()
+					return itemstack
+				end
+				break
+			end
+		end
+	end
+})
+
+minetest.register_craft({
+	output = "babycrafter:ring_stacker",
+	recipe = {
+		{"group:stick"},
+		{"babycrafter:wood_block"}
+	}
+})
 
 for _,v in ipairs(color_index) do
 	local upv
@@ -399,7 +457,7 @@ for _,v in ipairs(color_index) do
 		description = upv.." Wood Block",
 		drawtype = "normal",
 		is_ground_content = false,
-		tiles = {"babycrafter_wood_block.png^[colorize:"..v[#v]..":174"},
+		tiles = {"babycrafter_wood_block_colored.png^[multiply:"..v[#v]},
 		groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1},
 		sounds = {
 			footstep = {name = "", gain = 1},
@@ -411,7 +469,7 @@ for _,v in ipairs(color_index) do
 
 	if stairs_path then
 		stairs.register_stair_and_slab("wood_block_"..v[1], "babycrafter:wood_block_"..v[1],
-				{oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, falling_node = 1}, {"babycrafter_wood_block.png^[colorize:"..v[#v]..":174"},
+				{oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, falling_node = 1}, {"babycrafter_wood_block_colored.png^[multiply:"..v[#v]},
 				upv.." Wood Block Stair", upv.." Wood Block Slab", {footstep = {name = "", gain = 1}, dig = {name = "babycrafter_dig", gain = 1},
 				dug = {name = "babycrafter_dug", gain = 1}, place = {name = "babycrafter_place", gain = 1}})
 		if mcstair_path then
@@ -437,9 +495,9 @@ for _,v in ipairs(color_index) do
 			type = "fixed",
 			fixed = {{-0.5, -0.5, -0.5, 0.5, -0.25, 0.5}}
 		},
-		tiles = {"babycrafter_ring.png^[colorize:"..v[#v]..":223", "babycrafter_ring.png^[colorize:"..v[#v]..":223",
-				"babycrafter_ring_side.png^[colorize:"..v[#v]..":223"},
-		inventory_image = "babycrafter_ring.png^[colorize:"..v[#v]..":223",
+		tiles = {"babycrafter_ring.png", "babycrafter_ring.png", "babycrafter_ring_side.png"},
+		inventory_image = "babycrafter_ring.png",
+		color = v[#v],
 		groups = {dig_immediate = 3, falling_node = 1},
 		sounds = {
 			footstep = {name = "", gain = 1},
@@ -449,21 +507,81 @@ for _,v in ipairs(color_index) do
 		}
 	})
 
-	if ring_stacker_enabled == true then
-		minetest.register_node("babycrafter:ring_stacker_"..v[1], {
+	minetest.register_node("babycrafter:ring_stacker_color_"..v[1], {
+		description = "Ring Stacker",
+		drawtype = "nodebox",
+		paramtype = "light",
+		paramtype2 = "color",
+		is_ground_content = false,
+		node_box = {
+			type = "fixed",
+			fixed = {
+				{-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
+				{-0.1875, 0.25, -0.1875, 0.1875, 0.5, 0.1875}
+			}
+		},
+		tiles = {
+			{name = "babycrafter_wood_block.png^(babycrafter_ring.png^[multiply:"..v[#v]..")", color = "white"},
+			{name = "babycrafter_wood_block.png", color = "white"},
+			{name = "babycrafter_wood_block.png^[lowpart:75:babycrafter_ring_side.png\\^[multiply\\:"..v[#v].."^[lowpart:25:babycrafter_wood_block.png",
+					color = "white"}
+		},
+		overlay_tiles = {"", "", "babycrafter_ring_side_1.png"},
+		palette = "babycrafter_palette.png",
+		groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
+		sounds = {
+			footstep = {name = "", gain = 1},
+			dig = {name = "", gain = 1},
+			dug = {name = "babycrafter_dug", gain = 1},
+			place = {name = "babycrafter_place", gain = 1}
+		},
+		on_punch = function(pos, node, puncher)
+			local player_name = puncher:get_player_name()
+			minetest.log("action", player_name.." takes babycrafter:ring_"..v[1].." from a ring stacker at "..minetest.pos_to_string(pos))
+			minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color", param2 = node.param2})
+			minetest.sound_play({name = "babycrafter_place_ring", gain = 0.6}, {to_player = player_name})
+			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+			local inv = puncher:get_inventory()
+			if creative then
+				if not inv:contains_item("main", "babycrafter:ring_"..v[1]) then
+					inv:add_item("main", "babycrafter:ring_"..v[1])
+				end
+			else
+				inv:add_item("main", "babycrafter:ring_"..v[1])
+			end
+		end,
+		on_rightclick = function(pos, node, clicker, itemstack)
+			local player_name = clicker:get_player_name()
+			local item = itemstack:get_name()
+			for _,v2 in ipairs(color_index) do
+				if item == "babycrafter:ring_"..v2[1] then
+					minetest.log("action", player_name.." places babycrafter:ring_"..v2[1].." on a ring stacker at "..minetest.pos_to_string(pos))
+					minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color_"..v[1].."_"..v2[1], param2 = node.param2})
+					minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+					if not creative then
+						itemstack:take_item()
+						return itemstack
+					end
+					break
+				end
+			end
+		end
+	})
+	for _,v2 in ipairs(color_index) do
+		minetest.register_node("babycrafter:ring_stacker_color_"..v[1].."_"..v2[1], {
 			description = "Ring Stacker",
-			drawtype = "nodebox",
+			drawtype = "normal",
 			paramtype = "light",
+			paramtype2 = "color",
 			is_ground_content = false,
-			node_box = {
-				type = "fixed",
-				fixed = {
-					{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
-					{-0.1875, 0, -0.1875, 0.1875, 0.5, 0.1875}
-				}
+			tiles = {
+				{name = "babycrafter_wood_block.png^(babycrafter_ring.png^[multiply:"..v2[#v2]..")", color = "white"},
+				{name = "babycrafter_wood_block.png", color = "white"},
+				{name = "babycrafter_ring_side.png^[multiply:"..v2[#v2]..
+						"^[lowpart:75:babycrafter_ring_side.png\\^[multiply\\:"..v[#v].."^[lowpart:25:babycrafter_wood_block.png", color = "white"}
 			},
-			tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v[#v]..":223)", "babycrafter_wood_block.png",
-					"babycrafter_wood_block.png^[lowpart:50:babycrafter_ring_side.png\\^[colorize\\:"..v[#v].."\\:223^[lowpart:25:babycrafter_wood_block.png"},
+			overlay_tiles = {"", "", "babycrafter_ring_side_1.png"},
+			palette = "babycrafter_palette.png",
 			groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
 			sounds = {
 				footstep = {name = "", gain = 1},
@@ -471,151 +589,22 @@ for _,v in ipairs(color_index) do
 				dug = {name = "babycrafter_dug", gain = 1},
 				place = {name = "babycrafter_place", gain = 1}
 			},
-			drop = {
-				max_items = 2,
-				items = {
-					{items = {"babycrafter:ring_stacker"}, rarity = 1},
-					{items = {"babycrafter:ring_"..v[1]}, rarity = 1}
-				}
-			},
 			on_punch = function(pos, node, puncher)
 				local player_name = puncher:get_player_name()
-				minetest.log("action", player_name.." takes babycrafter:ring_"..v[1].." from a ring stacker at "..minetest.pos_to_string(pos))
-				minetest.swap_node(pos, {name = "babycrafter:ring_stacker"})
-				minetest.sound_play({name = "babycrafter_place_ring", gain = 0.6}, {to_player = player_name})
+				minetest.log("action", player_name.." takes babycrafter:ring_"..v2[1].." from a ring stacker at "..minetest.pos_to_string(pos))
+				minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color_"..v[1], param2 = node.param2})
+				minetest.sound_play({name = "babycrafter_place_ring", gain = 0.8}, {to_player = player_name})
 				minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
 				local inv = puncher:get_inventory()
 				if creative then
-					if not inv:contains_item("main", "babycrafter:ring_"..v[1]) then
-						inv:add_item("main", "babycrafter:ring_"..v[1])
+					if not inv:contains_item("main", "babycrafter:ring_"..v2[1]) then
+						inv:add_item("main", "babycrafter:ring_"..v2[1])
 					end
 				else
-					inv:add_item("main", "babycrafter:ring_"..v[1])
-				end
-			end,
-			on_rightclick = function(pos, node, clicker, itemstack)
-				local player_name = clicker:get_player_name()
-				local item = itemstack:get_name()
-				for _,v2 in ipairs(color_index) do
-					if item == "babycrafter:ring_"..v2[1] then
-						minetest.log("action", player_name.." places babycrafter:ring_"..v2[1].." on a ring stacker at "..minetest.pos_to_string(pos))
-						minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1].."_"..v2[1]})
-						minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
-						if not creative then
-							itemstack:take_item()
-							return itemstack
-						end
-						break
-					end
+					inv:add_item("main", "babycrafter:ring_"..v2[1])
 				end
 			end
 		})
-		for _,v2 in ipairs(color_index) do
-			minetest.register_node("babycrafter:ring_stacker_"..v[1].."_"..v2[1], {
-				description = "Ring Stacker",
-				drawtype = "nodebox",
-				paramtype = "light",
-				is_ground_content = false,
-				node_box = {
-					type = "fixed",
-					fixed = {
-						{-0.5, -0.5, -0.5, 0.5, 0.25, 0.5},
-						{-0.1875, 0.25, -0.1875, 0.1875, 0.5, 0.1875}
-					}
-				},
-				tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v2[#v2]..":223)", "babycrafter_wood_block.png",
-						"babycrafter_wood_block.png^[lowpart:75:babycrafter_ring_side.png\\^[colorize\\:"..v2[#v2]..
-						"\\:223^[lowpart:50:babycrafter_ring_side.png\\^[colorize\\:"..v[#v].."\\:223^[lowpart:25:babycrafter_wood_block.png"},
-				groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
-				sounds = {
-					footstep = {name = "", gain = 1},
-					dig = {name = "", gain = 1},
-					dug = {name = "babycrafter_dug", gain = 1},
-					place = {name = "babycrafter_place", gain = 1}
-				},
-				drop = {
-					max_items = 3,
-					items = {
-						{items = {"babycrafter:ring_stacker"}, rarity = 1},
-						{items = {"babycrafter:ring_"..v[1]}, rarity = 1},
-						{items = {"babycrafter:ring_"..v2[1]}, rarity = 1}
-					}
-				},
-				on_punch = function(pos, node, puncher)
-					local player_name = puncher:get_player_name()
-					minetest.log("action", player_name.." takes babycrafter:ring_"..v2[1].." from a ring stacker at "..minetest.pos_to_string(pos))
-					minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1]})
-					minetest.sound_play({name = "babycrafter_place_ring", gain = 0.8}, {to_player = player_name})
-					minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
-					local inv = puncher:get_inventory()
-					if creative then
-						if not inv:contains_item("main", "babycrafter:ring_"..v2[1]) then
-							inv:add_item("main", "babycrafter:ring_"..v2[1])
-						end
-					else
-						inv:add_item("main", "babycrafter:ring_"..v2[1])
-					end
-				end,
-				on_rightclick = function(pos, node, clicker, itemstack)
-					local player_name = clicker:get_player_name()
-					local item = itemstack:get_name()
-					for _,v3 in ipairs(color_index) do
-						if item == "babycrafter:ring_"..v3[1] then
-							minetest.log("action", player_name.." places babycrafter:ring_"..v3[1].." on a ring stacker at "..minetest.pos_to_string(pos))
-							minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1].."_"..v2[1].."_"..v3[1]})
-							minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
-							if not creative then
-								itemstack:take_item()
-								return itemstack
-							end
-							break
-						end
-					end
-				end
-			})
-			for _,v3 in ipairs(color_index) do
-				minetest.register_node("babycrafter:ring_stacker_"..v[1].."_"..v2[1].."_"..v3[1], {
-					description = "Ring Stacker",
-					drawtype = "normal",
-					paramtype = "light",
-					is_ground_content = false,
-					tiles = {"babycrafter_wood_block.png^(babycrafter_ring.png^[colorize:"..v3[#v3]..":223)", "babycrafter_wood_block.png",
-							"babycrafter_ring_side.png^[colorize:"..v3[#v3]..":223^[lowpart:75:babycrafter_ring_side.png\\^[colorize\\:"..v2[#v2]..
-							"\\:223^[lowpart:50:babycrafter_ring_side.png\\^[colorize\\:"..v[#v].."\\:223^[lowpart:25:babycrafter_wood_block.png"},
-					groups = {oddly_breakable_by_hand = 3, choppy = 2, flammable = 3, wood = 1, falling_node = 1, not_in_creative_inventory = 1},
-					sounds = {
-						footstep = {name = "", gain = 1},
-						dig = {name = "", gain = 1},
-						dug = {name = "babycrafter_dug", gain = 1},
-						place = {name = "babycrafter_place", gain = 1}
-					},
-					drop = {
-						max_items = 4,
-						items = {
-							{items = {"babycrafter:ring_stacker"}, rarity = 1},
-							{items = {"babycrafter:ring_"..v[1]}, rarity = 1},
-							{items = {"babycrafter:ring_"..v2[1]}, rarity = 1},
-							{items = {"babycrafter:ring_"..v3[1]}, rarity = 1}
-						}
-					},
-					on_punch = function(pos, node, puncher)
-						local player_name = puncher:get_player_name()
-						minetest.log("action", player_name.." takes babycrafter:ring_"..v3[1].." from a ring stacker at "..minetest.pos_to_string(pos))
-						minetest.swap_node(pos, {name = "babycrafter:ring_stacker_"..v[1].."_"..v2[1]})
-						minetest.sound_play({name = "babycrafter_place_ring", gain = 0.8}, {to_player = player_name})
-						minetest.sound_play({name = "babycrafter_slide_out", gain = 0.04}, {to_player = player_name})
-						local inv = puncher:get_inventory()
-						if creative then
-							if not inv:contains_item("main", "babycrafter:ring_"..v3[1]) then
-								inv:add_item("main", "babycrafter:ring_"..v3[1])
-							end
-						else
-							inv:add_item("main", "babycrafter:ring_"..v3[1])
-						end
-					end
-				})
-			end
-		end
 	end
 
 	minetest.register_craft({
