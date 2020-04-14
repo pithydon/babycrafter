@@ -1,9 +1,43 @@
 local creative = minetest.setting_getbool("creative_mode")
-local ring_stacker_enabled = minetest.setting_getbool("babycrafter_enable_ring_stacker")
-
 local stairs_path = minetest.get_modpath("stairs")
 local mcstair_path = minetest.get_modpath("mcstair")
 local treasurer_path = minetest.get_modpath("treasurer")
+
+minetest.register_tool("babycrafter:rattle_blue", {
+	description = "Blue Baby Rattle",
+	inventory_image = "babycrafter_rattle_blue.png",
+	wield_image = "babycrafter_rattle_blue.png",
+	on_use = function(itemstack, user)
+		minetest.sound_play({name = "babycrafter_rattle", gain = 1}, {pos = user:get_pos()}, true)
+	end
+})
+
+minetest.register_tool("babycrafter:rattle_pink", {
+	description = "Pink Baby Rattle",
+	inventory_image = "babycrafter_rattle_pink.png",
+	wield_image = "babycrafter_rattle_pink.png",
+	on_use = function(itemstack, user)
+		minetest.sound_play({name = "babycrafter_rattle", gain = 1}, {pos = user:get_pos()}, true)
+	end
+})
+
+minetest.register_craft({
+	output = "babycrafter:rattle_blue",
+	recipe = {
+		{"", "default:clay_lump", "dye:blue"},
+		{"", "group:stick", "default:clay_lump"},
+		{"group:stick", "", ""}
+	}
+})
+
+minetest.register_craft({
+	output = "babycrafter:rattle_pink",
+	recipe = {
+		{"", "default:clay_lump", "dye:pink"},
+		{"", "group:stick", "default:clay_lump"},
+		{"group:stick", "", ""}
+	}
+})
 
 for _,v in ipairs({{"a",{1,0,0,0,0,0},58},{"b",{1,0,1,0,0,0},41},
 		{"c",{1,1,0,0,0,0},49},{"d",{1,1,0,1,0,0},51},{"e",{1,0,0,1,0,0},60},{"f",{1,1,1,0,0,0},45},{"g",{1,1,1,1,0,0},44},
@@ -151,16 +185,16 @@ for i=0,15 do
 			local name = stack:get_name()
 			local desc
 			local ni
-			if name == "babycrafter:red_square" and index == 1 then
+			if name == "babycrafter:red_square" and index == 1 and i < 8 then
 				desc = "red square"
 				ni = i + 8
-			elseif name == "babycrafter:blue_circle" and index == 2 then
+			elseif name == "babycrafter:blue_circle" and index == 2 and i < 12 then
 				desc = "blue circle"
 				ni = i + 4
-			elseif name == "babycrafter:green_triangle" and index == 3 then
+			elseif name == "babycrafter:green_triangle" and index == 3 and i < 14 then
 				desc = "green triangle"
 				ni = i + 2
-			elseif name == "babycrafter:yellow_star" and index == 4 then
+			elseif name == "babycrafter:yellow_star" and index == 4 and i < 15 then
 				desc = "yellow star"
 				ni = i + 1
 			else
@@ -171,23 +205,23 @@ for i=0,15 do
 			local node = minetest.get_node(pos)
 			local player_name = player:get_player_name()
 			minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..ni, param2 = node.param2})
-			minetest.sound_play({name = "babycrafter_slide_in", gain = 0.1}, {to_player = player_name})
+			minetest.sound_play({name = "babycrafter_slide_in", gain = 0.2}, {to_player = player_name}, true)
 			minetest.log("action", player_name.." places a "..desc.." in a shape sorter at "..minetest.pos_to_string(pos))
 		end,
 		on_metadata_inventory_take = function(pos, listname, index, stack, player)
 			local name = stack:get_name()
 			local desc
 			local ni
-			if name == "babycrafter:red_square" and index == 1 then
+			if name == "babycrafter:red_square" and index == 1 and i >= 8 then
 				desc = "a red square"
 				ni = i - 8
-			elseif name == "babycrafter:blue_circle" and index == 2 then
+			elseif name == "babycrafter:blue_circle" and index == 2 and i >= 4 then
 				desc = "a blue circle"
 				ni = i - 4
-			elseif name == "babycrafter:green_triangle" and index == 3 then
+			elseif name == "babycrafter:green_triangle" and index == 3 and i >= 2 then
 				desc = "a green triangle"
 				ni = i - 2
-			elseif name == "babycrafter:yellow_star" and index == 4 then
+			elseif name == "babycrafter:yellow_star" and index == 4 and i >= 1 then
 				desc = "a yellow star"
 				ni = i - 1
 			else
@@ -202,7 +236,7 @@ for i=0,15 do
 			local node = minetest.get_node(pos)
 			local player_name = player:get_player_name()
 			minetest.swap_node(pos, {name = new_name, param2 = node.param2})
-			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.2}, {to_player = player_name}, true)
 			minetest.log("action", player_name.." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
 		end
 	})
@@ -232,19 +266,14 @@ if minetest.get_modpath("mesecons") then
 			on_metadata_inventory_put = function(pos, listname, index, stack, player)
 				local name = stack:get_name()
 				local desc
-				local ni
-				if name == "babycrafter:red_square" and index == 1 then
+				if name == "babycrafter:red_square" and index == 1 and v == 7 then
 					desc = "red square"
-					ni = v + 8
-				elseif name == "babycrafter:blue_circle" and index == 2 then
+				elseif name == "babycrafter:blue_circle" and index == 2 and v == 11 then
 					desc = "blue circle"
-					ni = v + 4
-				elseif name == "babycrafter:green_triangle" and index == 3 then
+				elseif name == "babycrafter:green_triangle" and index == 3 and v == 13 then
 					desc = "green triangle"
-					ni = v + 2
-				elseif name == "babycrafter:yellow_star" and index == 4 then
+				elseif name == "babycrafter:yellow_star" and index == 4 and v == 14 then
 					desc = "yellow star"
-					ni = v + 1
 				else
 					minetest.log("error", player:get_player_name().." placed a misshaped \""..name
 					.."\" in a \"babycrafter:shape_sorter_"..v.."\" at "..minetest.pos_to_string(pos))
@@ -252,8 +281,8 @@ if minetest.get_modpath("mesecons") then
 				end
 				local node = minetest.get_node(pos)
 				local player_name = player:get_player_name()
-				minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..ni, param2 = node.param2})
-				minetest.sound_play({name = "babycrafter_slide_in", gain = 0.1}, {to_player = player_name})
+				minetest.swap_node(pos, {name = "babycrafter:shape_sorter_15", param2 = node.param2})
+				minetest.sound_play({name = "babycrafter_slide_in", gain = 0.2}, {to_player = player_name}, true)
 				mesecon.receptor_on(pos, mesecon.rules.alldirs)
 				minetest.log("action", player_name.." places a "..desc.." in a shape sorter at "..minetest.pos_to_string(pos))
 			end
@@ -288,7 +317,7 @@ if minetest.get_modpath("mesecons") then
 			local node = minetest.get_node(pos)
 			local player_name = player:get_player_name()
 			minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..ni, param2 = node.param2})
-			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.2}, {to_player = player_name}, true)
 			mesecon.receptor_off(pos, mesecon.rules.alldirs)
 			minetest.log("action", player_name.." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
 		end
@@ -364,7 +393,7 @@ minetest.register_node("babycrafter:ring_stacker", {
 			if item == "babycrafter:ring_"..v[1] then
 				minetest.log("action", player_name.." places babycrafter:ring_"..v[1].." on a ring stacker at "..minetest.pos_to_string(pos))
 				minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color", param2 = i - 1})
-				minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+				minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name}, true)
 				if not creative then
 					itemstack:take_item()
 					return itemstack
@@ -406,8 +435,8 @@ minetest.register_node("babycrafter:ring_stacker_color", {
 		local color = color_index[node.param2 + 1]
 		minetest.log("action", player_name.." takes babycrafter:ring_"..color[1].." from a ring stacker at "..minetest.pos_to_string(pos))
 		minetest.swap_node(pos, {name = "babycrafter:ring_stacker"})
-		minetest.sound_play({name = "babycrafter_place_ring", gain = 0.6}, {to_player = player_name})
-		minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+		minetest.sound_play({name = "babycrafter_place_ring", gain = 0.6}, {to_player = player_name}, true)
+		minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name}, true)
 		local inv = puncher:get_inventory()
 		if creative then
 			if not inv:contains_item("main", "babycrafter:ring_"..color[1]) then
@@ -424,7 +453,7 @@ minetest.register_node("babycrafter:ring_stacker_color", {
 			if item == "babycrafter:ring_"..v[1] then
 				minetest.log("action", player_name.." places babycrafter:ring_"..v[1].." on a ring stacker at "..minetest.pos_to_string(pos))
 				minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color_"..v[1], param2 = node.param2})
-				minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+				minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name}, true)
 				if not creative then
 					itemstack:take_item()
 					return itemstack
@@ -539,8 +568,8 @@ for _,v in ipairs(color_index) do
 			local player_name = puncher:get_player_name()
 			minetest.log("action", player_name.." takes babycrafter:ring_"..v[1].." from a ring stacker at "..minetest.pos_to_string(pos))
 			minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color", param2 = node.param2})
-			minetest.sound_play({name = "babycrafter_place_ring", gain = 0.6}, {to_player = player_name})
-			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+			minetest.sound_play({name = "babycrafter_place_ring", gain = 0.6}, {to_player = player_name}, true)
+			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name}, true)
 			local inv = puncher:get_inventory()
 			if creative then
 				if not inv:contains_item("main", "babycrafter:ring_"..v[1]) then
@@ -557,7 +586,7 @@ for _,v in ipairs(color_index) do
 				if item == "babycrafter:ring_"..v2[1] then
 					minetest.log("action", player_name.." places babycrafter:ring_"..v2[1].." on a ring stacker at "..minetest.pos_to_string(pos))
 					minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color_"..v[1].."_"..v2[1], param2 = node.param2})
-					minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name})
+					minetest.sound_play({name = "babycrafter_place_ring", gain = 1}, {to_player = player_name}, true)
 					if not creative then
 						itemstack:take_item()
 						return itemstack
@@ -593,8 +622,8 @@ for _,v in ipairs(color_index) do
 				local player_name = puncher:get_player_name()
 				minetest.log("action", player_name.." takes babycrafter:ring_"..v2[1].." from a ring stacker at "..minetest.pos_to_string(pos))
 				minetest.swap_node(pos, {name = "babycrafter:ring_stacker_color_"..v[1], param2 = node.param2})
-				minetest.sound_play({name = "babycrafter_place_ring", gain = 0.8}, {to_player = player_name})
-				minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name})
+				minetest.sound_play({name = "babycrafter_place_ring", gain = 0.8}, {to_player = player_name}, true)
+				minetest.sound_play({name = "babycrafter_slide_out", gain = 0.1}, {to_player = player_name}, true)
 				local inv = puncher:get_inventory()
 				if creative then
 					if not inv:contains_item("main", "babycrafter:ring_"..v2[1]) then
@@ -708,14 +737,18 @@ minetest.register_craft({
 	}
 })
 
+if minetest.get_modpath("dungeon_loot") then
+	dungeon_loot.register({{name = "babycrafter:rattle_blue", chance = 0.5}, {name = "babycrafter:rattle_pink", chance = 0.5}})
+end
+
 if treasurer_path then
+	treasurer.register_treasure("babycrafter:rattle_blue",0.02,2,1)
+	treasurer.register_treasure("babycrafter:rattle_pink",0.02,2,1)
 	treasurer.register_treasure("babycrafter:wood_block",0.006,2,{1,20},nil,"building_block")
 	treasurer.register_treasure("babycrafter:shape_sorter",0.002,4,1,nil,"deco")
 	treasurer.register_treasure("babycrafter:red_square",0.002,2,1)
 	treasurer.register_treasure("babycrafter:blue_circle",0.002,2,1)
 	treasurer.register_treasure("babycrafter:green_triangle",0.002,2,1)
 	treasurer.register_treasure("babycrafter:yellow_star",0.002,2,1)
-	if ring_stacker_enabled == true then
-		treasurer.register_treasure("babycrafter:ring_stacker",0.002,4,1,nil,"deco")
-	end
+	treasurer.register_treasure("babycrafter:ring_stacker",0.002,4,1,nil,"deco")
 end
