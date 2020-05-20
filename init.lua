@@ -1,4 +1,4 @@
-local creative = minetest.setting_getbool("creative_mode")
+local creative = minetest.settings:get_bool("creative_mode")
 local stairs_path = minetest.get_modpath("stairs")
 local mcstair_path = minetest.get_modpath("mcstair")
 local treasurer_path = minetest.get_modpath("treasurer")
@@ -19,24 +19,6 @@ minetest.register_tool("babycrafter:rattle_pink", {
 	on_use = function(itemstack, user)
 		minetest.sound_play({name = "babycrafter_rattle", gain = 1}, {pos = user:get_pos()}, true)
 	end
-})
-
-minetest.register_craft({
-	output = "babycrafter:rattle_blue",
-	recipe = {
-		{"", "default:clay_lump", "dye:blue"},
-		{"", "group:stick", "default:clay_lump"},
-		{"group:stick", "", ""}
-	}
-})
-
-minetest.register_craft({
-	output = "babycrafter:rattle_pink",
-	recipe = {
-		{"", "default:clay_lump", "dye:pink"},
-		{"", "group:stick", "default:clay_lump"},
-		{"group:stick", "", ""}
-	}
 })
 
 for _,v in ipairs({{"a",{1,0,0,0,0,0},58},{"b",{1,0,1,0,0,0},41},
@@ -99,6 +81,326 @@ for iy=4,6 do
 	end
 end
 
+local clicked_shape = function(under, above, face_pos, face, rotate)
+	local quad
+	if under.x ~= above.x then
+		local y = face_pos.y % 1
+		local z = face_pos.z % 1
+		if y < 0.5 then
+			if z > 0.5 then
+				quad = 1
+			else
+				quad = 2
+			end
+		else
+			if z > 0.5 then
+				quad = 3
+			else
+				quad = 4
+			end
+		end
+	elseif under.y ~= above.y then
+		local x = face_pos.x % 1
+		local z = face_pos.z % 1
+		if z < 0.5 then
+			if x > 0.5 then
+				quad = 1
+			else
+				quad = 2
+			end
+		else
+			if x > 0.5 then
+				quad = 3
+			else
+				quad = 4
+			end
+		end
+	elseif under.z ~= above.z then
+		local y = face_pos.y % 1
+		local x = face_pos.x % 1
+		if y < 0.5 then
+			if x > 0.5 then
+				quad = 1
+			else
+				quad = 2
+			end
+		else
+			if x > 0.5 then
+				quad = 3
+			else
+				quad = 4
+			end
+		end
+	else
+		return
+	end
+	if face == 0 then
+		if under.y < above.y then
+			if rotate == 0 then
+				if quad == 1 then
+					return "babycrafter:red_square"
+				elseif quad == 2 then
+					return "babycrafter:blue_circle"
+				elseif quad == 3 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 1 then
+				if quad == 2 then
+					return "babycrafter:red_square"
+				elseif quad == 4 then
+					return "babycrafter:blue_circle"
+				elseif quad == 1 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 2 then
+				if quad == 4 then
+					return "babycrafter:red_square"
+				elseif quad == 3 then
+					return "babycrafter:blue_circle"
+				elseif quad == 2 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			else
+				if quad == 3 then
+					return "babycrafter:red_square"
+				elseif quad == 1 then
+					return "babycrafter:blue_circle"
+				elseif quad == 4 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			end
+		end
+	elseif face == 1 then
+		if under.z < above.z then
+			if rotate == 0 then
+				if quad == 3 then
+					return "babycrafter:red_square"
+				elseif quad == 4 then
+					return "babycrafter:blue_circle"
+				elseif quad == 1 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 1 then
+				if quad == 4 then
+					return "babycrafter:red_square"
+				elseif quad == 2 then
+					return "babycrafter:blue_circle"
+				elseif quad == 3 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 2 then
+				if quad == 2 then
+					return "babycrafter:red_square"
+				elseif quad == 1 then
+					return "babycrafter:blue_circle"
+				elseif quad == 4 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			else
+				if quad == 1 then
+					return "babycrafter:red_square"
+				elseif quad == 3 then
+					return "babycrafter:blue_circle"
+				elseif quad == 2 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			end
+		end
+	elseif face == 2 then
+		if under.z > above.z then
+			if rotate == 0 then
+				if quad == 1 then
+					return "babycrafter:red_square"
+				elseif quad == 2 then
+					return "babycrafter:blue_circle"
+				elseif quad == 3 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 1 then
+				if quad == 2 then
+					return "babycrafter:red_square"
+				elseif quad == 4 then
+					return "babycrafter:blue_circle"
+				elseif quad == 1 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 2 then
+				if quad == 4 then
+					return "babycrafter:red_square"
+				elseif quad == 3 then
+					return "babycrafter:blue_circle"
+				elseif quad == 2 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			else
+				if quad == 3 then
+					return "babycrafter:red_square"
+				elseif quad == 1 then
+					return "babycrafter:blue_circle"
+				elseif quad == 4 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			end
+		end
+	elseif face == 3 then
+		if under.x < above.x then
+			if rotate == 0 then
+				if quad == 2 then
+					return "babycrafter:red_square"
+				elseif quad == 4 then
+					return "babycrafter:blue_circle"
+				elseif quad == 1 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 1 then
+				if quad == 4 then
+					return "babycrafter:red_square"
+				elseif quad == 3 then
+					return "babycrafter:blue_circle"
+				elseif quad == 2 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 2 then
+				if quad == 3 then
+					return "babycrafter:red_square"
+				elseif quad == 1 then
+					return "babycrafter:blue_circle"
+				elseif quad == 4 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			else
+				if quad == 1 then
+					return "babycrafter:red_square"
+				elseif quad == 2 then
+					return "babycrafter:blue_circle"
+				elseif quad == 3 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			end
+		end
+	elseif face == 4 then
+		if under.x > above.x then
+			if rotate == 0 then
+				if quad == 4 then
+					return "babycrafter:red_square"
+				elseif quad == 2 then
+					return "babycrafter:blue_circle"
+				elseif quad == 3 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 1 then
+				if quad == 2 then
+					return "babycrafter:red_square"
+				elseif quad == 1 then
+					return "babycrafter:blue_circle"
+				elseif quad == 4 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 2 then
+				if quad == 1 then
+					return "babycrafter:red_square"
+				elseif quad == 3 then
+					return "babycrafter:blue_circle"
+				elseif quad == 2 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			else
+				if quad == 3 then
+					return "babycrafter:red_square"
+				elseif quad == 4 then
+					return "babycrafter:blue_circle"
+				elseif quad == 1 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			end
+		end
+	else
+		if under.y > above.y then
+			if rotate == 0 then
+				if quad == 2 then
+					return "babycrafter:red_square"
+				elseif quad == 1 then
+					return "babycrafter:blue_circle"
+				elseif quad == 4 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 1 then
+				if quad == 1 then
+					return "babycrafter:red_square"
+				elseif quad == 3 then
+					return "babycrafter:blue_circle"
+				elseif quad == 2 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			elseif rotate == 2 then
+				if quad == 3 then
+					return "babycrafter:red_square"
+				elseif quad == 4 then
+					return "babycrafter:blue_circle"
+				elseif quad == 1 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			else
+				if quad == 4 then
+					return "babycrafter:red_square"
+				elseif quad == 2 then
+					return "babycrafter:blue_circle"
+				elseif quad == 3 then
+					return "babycrafter:green_triangle"
+				else
+					return "babycrafter:yellow_star"
+				end
+			end
+		end
+	end
+end
+
 for i=0,15 do
 	local node_name = "babycrafter:shape_sorter_"..i
 	local cn = 1
@@ -157,16 +459,171 @@ for i=0,15 do
 			max_items = 5,
 			items = drops
 		},
-		on_construct = function(pos)
+		on_place = function(itemstack, placer, pointed_thing)
+			if pointed_thing.type ~= "node" then
+				return itemstack
+			end
+			local under = pointed_thing.under
+			local above = pointed_thing.above
+			local param2
+			local pos = placer:get_pos()
+			local x = pos.x - under.x
+			local z = pos.z - under.z
+			if math.abs(x) > math.abs(z) then
+				if pos.x > under.x then
+					param2 = 3
+				else
+					param2 = 1
+				end
+			else
+				if pos.z > under.z then
+					param2 = 2
+				else
+					param2 = 0
+				end
+			end
+			local face_pos = minetest.pointed_thing_to_face_pos(placer, pointed_thing).y % 1
+			if under.y > above.y or (under.y == above.y and face_pos < 0.5) then
+				if param2 == 0 then
+					param2 = 8
+				elseif param2 == 1 then
+					param2 = 17
+				elseif param2 == 2 then
+					param2 = 6
+				else
+					param2 = 15
+				end
+			end
+			return minetest.item_place_node(itemstack, placer, pointed_thing, param2)
+		end,
+		on_punch = function(pos, node, puncher, pointed_thing)
+			local itemstack = puncher:get_wielded_item()
+			if itemstack:is_empty() then
+				local meta = minetest.get_meta(pos)
+				local inv = meta:get_inventory()
+				if inv:get_size("shapes") ~= 4 then
+					inv:set_size("shapes", 4)
+					for _,v in ipairs(consinv) do
+						inv:set_stack("shapes", v[1], v[2])
+					end
+				end
+				local face = math.floor(node.param2 / 4) % 6
+				local rotate = node.param2 % 4
+				local face_pos = minetest.pointed_thing_to_face_pos(puncher, pointed_thing)
+				local under = pointed_thing.under
+				local above = pointed_thing.above
+				local shape = clicked_shape(under, above, face_pos, face, rotate)
+				local desc
+				local ni
+				if shape == "babycrafter:red_square" and i >= 8 then
+					local stack = inv:get_stack("shapes", 1)
+					if stack:get_name() == "babycrafter:red_square" then
+						desc = "a red square"
+						ni = i - 8
+						local item = stack:peek_item()
+						puncher:set_wielded_item(item)
+						inv:remove_item("shapes", item)
+					else
+						return
+					end
+				elseif shape == "babycrafter:blue_circle" and i >= 4 then
+					local stack = inv:get_stack("shapes", 2)
+					if stack:get_name() == "babycrafter:blue_circle" then
+						desc = "a blue circle"
+						ni = i - 4
+						local item = stack:peek_item()
+						puncher:set_wielded_item(item)
+						inv:remove_item("shapes", item)
+					else
+						return
+					end
+				elseif shape == "babycrafter:green_triangle" and i >= 2 then
+					local stack = inv:get_stack("shapes", 3)
+					if stack:get_name() == "babycrafter:green_triangle" then
+						desc = "a green triangle"
+						ni = i - 2
+						local item = stack:peek_item()
+						puncher:set_wielded_item(item)
+						inv:remove_item("shapes", item)
+					else
+						return
+					end
+				elseif shape == "babycrafter:yellow_star" and i >= 1 then
+					local stack = inv:get_stack("shapes", 4)
+					if stack:get_name() == "babycrafter:yellow_star" then
+						desc = "a yellow star"
+						ni = i - 1
+						local item = stack:peek_item()
+						puncher:set_wielded_item(item)
+						inv:remove_item("shapes", item)
+					else
+						return
+					end
+				else
+					return
+				end
+				local new_name = "babycrafter:shape_sorter_"..ni
+				if ni == 0 then
+					new_name = "babycrafter:shape_sorter"
+				end
+				local player_name = puncher:get_player_name()
+				minetest.swap_node(pos, {name = new_name, param2 = node.param2})
+				minetest.sound_play({name = "babycrafter_slide_out", gain = 0.2}, {to_player = player_name}, true)
+				minetest.log("action", player_name.." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
+			end
+		end,
+		on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
 			local meta = minetest.get_meta(pos)
-			meta:set_string("formspec", "size[8,7;]background[0,0;8,7;babycrafter_shape_sorter_formspec.png;true]"
-					.."bgcolor[#bbbb;true]listcolors[#0000;#594d38aa;#0000;#787e50;#fff]"
-					.."list[context;shapes;3,0.3;2,2;]list[current_player;main;0,2.85;8,1;]list[current_player;main;0,4.08;8,3;8]"
-					.."listring[context;shapes]listring[current_player;main]"..invimgs)
 			local inv = meta:get_inventory()
-			inv:set_size("shapes", 4)
-			for _,v in ipairs(consinv) do
-				inv:set_stack("shapes", v[1], v[2])
+			if inv:get_size("shapes") ~= 4 then
+				inv:set_size("shapes", 4)
+				for _,v in ipairs(consinv) do
+					inv:set_stack("shapes", v[1], v[2])
+				end
+			end
+			local name = itemstack:get_name()
+			local face = math.floor(node.param2 / 4) % 6
+			local rotate = node.param2 % 4
+			local face_pos = minetest.pointed_thing_to_face_pos(clicker, pointed_thing)
+			local under = pointed_thing.under
+			local above = pointed_thing.above
+			local player_name = clicker:get_player_name()
+			if name == clicked_shape(under, above, face_pos, face, rotate) then
+				local desc
+				local ni
+				if name == "babycrafter:red_square" and inv:get_stack("shapes", 1):is_empty() and i < 8 then
+					desc = "red square"
+					ni = i + 8
+					inv:set_stack("shapes", 1, ItemStack("babycrafter:red_square"))
+				elseif name == "babycrafter:blue_circle" and inv:get_stack("shapes", 2):is_empty() and i < 12 then
+					desc = "blue circle"
+					ni = i + 4
+					inv:set_stack("shapes", 2, ItemStack("babycrafter:blue_circle"))
+				elseif name == "babycrafter:green_triangle" and inv:get_stack("shapes", 3):is_empty() and i < 14 then
+					desc = "green triangle"
+					ni = i + 2
+					inv:set_stack("shapes", 3, ItemStack("babycrafter:green_triangle"))
+				elseif name == "babycrafter:yellow_star" and inv:get_stack("shapes", 4):is_empty() and i < 15 then
+					desc = "yellow star"
+					ni = i + 1
+					inv:set_stack("shapes", 4, ItemStack("babycrafter:yellow_star"))
+				else
+					minetest.show_formspec(player_name, "babycrafter:shape_sorter_formspec", "size[8,7;]background[0,0;8,7;babycrafter_shape_sorter_formspec.png;true]"..
+							"bgcolor[#bbbb;true]listcolors[#0000;#594d38aa;#0000;#787e50;#fff]list[nodemeta:"..pos.x..","..pos.y..","..pos.z..
+							";shapes;3,0.3;2,2;]list[current_player;main;0,2.85;8,1;]list[current_player;main;0,4.08;8,3;8]listring[nodemeta:"..
+							pos.x..","..pos.y..","..pos.z..";shapes]listring[current_player;main]"..invimgs)
+					return
+				end
+				minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..ni, param2 = node.param2})
+				minetest.sound_play({name = "babycrafter_slide_in", gain = 0.2}, {to_player = player_name}, true)
+				minetest.log("action", player_name.." places a "..desc.." in a shape sorter at "..minetest.pos_to_string(pos))
+				itemstack:take_item()
+				return itemstack
+			else
+				minetest.show_formspec(player_name, "babycrafter:shape_sorter_formspec", "size[8,7;]background[0,0;8,7;babycrafter_shape_sorter_formspec.png;true]"..
+						"bgcolor[#bbbb;true]listcolors[#0000;#594d38aa;#0000;#787e50;#fff]list[nodemeta:"..pos.x..","..pos.y..","..pos.z..
+						";shapes;3,0.3;2,2;]list[current_player;main;0,2.85;8,1;]list[current_player;main;0,4.08;8,3;8]listring[nodemeta:"..
+						pos.x..","..pos.y..","..pos.z..";shapes]listring[current_player;main]"..invimgs)
 			end
 		end,
 		allow_metadata_inventory_put = function(pos, listname, index, stack)
@@ -240,6 +697,16 @@ for i=0,15 do
 			minetest.log("action", player_name.." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
 		end
 	})
+
+	minetest.register_lbm({
+		name = "babycrafter:update_shape_sorter",
+		nodenames = {node_name},
+		run_at_every_load = false,
+		action = function(pos, node)
+			local meta = minetest.get_meta(pos)
+			meta:set_string("formspec", "")
+		end
+	})
 end
 
 minetest.override_item("babycrafter:shape_sorter_15", {
@@ -263,6 +730,56 @@ if minetest.get_modpath("mesecons") then
 	end
 	for _,v in ipairs({7,11,13,14}) do
 		minetest.override_item("babycrafter:shape_sorter_"..v, {
+			on_rightclick = function(pos, node, clicker, itemstack, pointed_thing)
+				local meta = minetest.get_meta(pos)
+				local inv = meta:get_inventory()
+				if inv:get_size("shapes") ~= 4 then
+					inv:set_size("shapes", 4)
+					for _,v in ipairs(consinv) do
+						inv:set_stack("shapes", v[1], v[2])
+					end
+				end
+				local name = itemstack:get_name()
+				local face = math.floor(node.param2 / 4) % 6
+				local rotate = node.param2 % 4
+				local face_pos = minetest.pointed_thing_to_face_pos(clicker, pointed_thing)
+				local under = pointed_thing.under
+				local above = pointed_thing.above
+				local player_name = clicker:get_player_name()
+				if name == clicked_shape(under, above, face_pos, face, rotate) then
+					local desc
+					if name == "babycrafter:red_square" and inv:get_stack("shapes", 1):is_empty() and v == 7 then
+						desc = "red square"
+						inv:set_stack("shapes", 1, ItemStack("babycrafter:red_square"))
+					elseif name == "babycrafter:blue_circle" and inv:get_stack("shapes", 2):is_empty() and v == 11 then
+						desc = "blue circle"
+						inv:set_stack("shapes", 2, ItemStack("babycrafter:blue_circle"))
+					elseif name == "babycrafter:green_triangle" and inv:get_stack("shapes", 3):is_empty() and v == 13 then
+						desc = "green triangle"
+						inv:set_stack("shapes", 3, ItemStack("babycrafter:green_triangle"))
+					elseif name == "babycrafter:yellow_star" and inv:get_stack("shapes", 4):is_empty() and v == 14 then
+						desc = "yellow star"
+						inv:set_stack("shapes", 4, ItemStack("babycrafter:yellow_star"))
+					else
+						minetest.show_formspec(player_name, "babycrafter:shape_sorter_formspec", "size[8,7;]background[0,0;8,7;babycrafter_shape_sorter_formspec.png;true]"..
+								"bgcolor[#bbbb;true]listcolors[#0000;#594d38aa;#0000;#787e50;#fff]list[nodemeta:"..pos.x..","..pos.y..","..pos.z..
+								";shapes;3,0.3;2,2;]list[current_player;main;0,2.85;8,1;]list[current_player;main;0,4.08;8,3;8]listring[nodemeta:"..
+								pos.x..","..pos.y..","..pos.z..";shapes]listring[current_player;main]"..invimgs)
+						return
+					end
+					minetest.swap_node(pos, {name = "babycrafter:shape_sorter_15", param2 = node.param2})
+					minetest.sound_play({name = "babycrafter_slide_in", gain = 0.2}, {to_player = player_name}, true)
+					mesecon.receptor_on(pos, mesecon.rules.alldirs)
+					minetest.log("action", player_name.." places a "..desc.." in a shape sorter at "..minetest.pos_to_string(pos))
+					itemstack:take_item()
+					return itemstack
+				else
+					minetest.show_formspec(player_name, "babycrafter:shape_sorter_formspec", "size[8,7;]background[0,0;8,7;babycrafter_shape_sorter_formspec.png;true]"..
+							"bgcolor[#bbbb;true]listcolors[#0000;#594d38aa;#0000;#787e50;#fff]list[nodemeta:"..pos.x..","..pos.y..","..pos.z..
+							";shapes;3,0.3;2,2;]list[current_player;main;0,2.85;8,1;]list[current_player;main;0,4.08;8,3;8]listring[nodemeta:"..
+							pos.x..","..pos.y..","..pos.z..";shapes]listring[current_player;main]"..invimgs)
+				end
+			end,
 			on_metadata_inventory_put = function(pos, listname, index, stack, player)
 				local name = stack:get_name()
 				local desc
@@ -293,22 +810,96 @@ if minetest.get_modpath("mesecons") then
 			state = mesecon.state.on,
 			rules = mesecon.rules.alldirs
 		}},
+		on_punch = function(pos, node, puncher, pointed_thing)
+			local itemstack = puncher:get_wielded_item()
+			if itemstack:is_empty() then
+				local meta = minetest.get_meta(pos)
+				local inv = meta:get_inventory()
+				if inv:get_size("shapes") ~= 4 then
+					inv:set_size("shapes", 4)
+					for _,v in ipairs(consinv) do
+						inv:set_stack("shapes", v[1], v[2])
+					end
+				end
+				local face = math.floor(node.param2 / 4) % 6
+				local rotate = node.param2 % 4
+				local face_pos = minetest.pointed_thing_to_face_pos(puncher, pointed_thing)
+				local under = pointed_thing.under
+				local above = pointed_thing.above
+				local shape = clicked_shape(under, above, face_pos, face, rotate)
+				local desc
+				local i
+				if shape == "babycrafter:red_square" then
+					local stack = inv:get_stack("shapes", 1)
+					if stack:get_name() == "babycrafter:red_square" then
+						desc = "a red square"
+						i = 15 - 8
+						local item = stack:peek_item()
+						puncher:set_wielded_item(item)
+						inv:remove_item("shapes", item)
+					else
+						return
+					end
+				elseif shape == "babycrafter:blue_circle" then
+					local stack = inv:get_stack("shapes", 2)
+					if stack:get_name() == "babycrafter:blue_circle" then
+						desc = "a blue circle"
+						i = 15 - 4
+						local item = stack:peek_item()
+						puncher:set_wielded_item(item)
+						inv:remove_item("shapes", item)
+					else
+						return
+					end
+				elseif shape == "babycrafter:green_triangle" then
+					local stack = inv:get_stack("shapes", 3)
+					if stack:get_name() == "babycrafter:green_triangle" then
+						desc = "a green triangle"
+						i = 15 - 2
+						local item = stack:peek_item()
+						puncher:set_wielded_item(item)
+						inv:remove_item("shapes", item)
+					else
+						return
+					end
+				elseif shape == "babycrafter:yellow_star" then
+					local stack = inv:get_stack("shapes", 4)
+					if stack:get_name() == "babycrafter:yellow_star" then
+						desc = "a yellow star"
+						i = 15 - 1
+						local item = stack:peek_item()
+						puncher:set_wielded_item(item)
+						inv:remove_item("shapes", item)
+					else
+						return
+					end
+				else
+					return
+				end
+				local new_name = "babycrafter:shape_sorter_"..i
+				local player_name = puncher:get_player_name()
+				minetest.swap_node(pos, {name = new_name, param2 = node.param2})
+				minetest.sound_play({name = "babycrafter_slide_out", gain = 0.2}, {to_player = player_name}, true)
+				mesecon.receptor_off(pos, mesecon.rules.alldirs)
+				minetest.log("action", player_name.." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
+			end
+		end,
 		on_metadata_inventory_take = function(pos, listname, index, stack, player)
 			local name = stack:get_name()
 			local desc
-			local ni = 15
+			local i
 			if name == "babycrafter:red_square" and index == 1 then
 				desc = "a red square"
-				ni = ni - 8
+				i = 15 - 8
 			elseif name == "babycrafter:blue_circle" and index == 2 then
 				desc = "a blue circle"
-				ni = ni - 4
+				i = 15 - 4
 			elseif name == "babycrafter:green_triangle" and index == 3 then
 				desc = "a green triangle"
-				ni = ni - 2
+				i = 15 - 2
 			elseif name == "babycrafter:yellow_star" and index == 4 then
 				desc = "a yellow star"
-				ni = ni - 1
+				i = 15 - 1
 			else
 				minetest.log("error", player:get_player_name().." takes a misshaped \""..name
 				.."\" from a \"babycrafter:shape_sorter_15\" at "..minetest.pos_to_string(pos))
@@ -316,7 +907,7 @@ if minetest.get_modpath("mesecons") then
 			end
 			local node = minetest.get_node(pos)
 			local player_name = player:get_player_name()
-			minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..ni, param2 = node.param2})
+			minetest.swap_node(pos, {name = "babycrafter:shape_sorter_"..i, param2 = node.param2})
 			minetest.sound_play({name = "babycrafter_slide_out", gain = 0.2}, {to_player = player_name}, true)
 			mesecon.receptor_off(pos, mesecon.rules.alldirs)
 			minetest.log("action", player_name.." takes "..desc.." from a shape sorter at "..minetest.pos_to_string(pos))
@@ -682,6 +1273,24 @@ minetest.register_craftitem("babycrafter:yellow_star", {
 })
 
 minetest.register_craft({
+	output = "babycrafter:rattle_blue",
+	recipe = {
+		{"", "default:clay_lump", "dye:blue"},
+		{"", "group:stick", "default:clay_lump"},
+		{"group:stick", "", ""}
+	}
+})
+
+minetest.register_craft({
+	output = "babycrafter:rattle_pink",
+	recipe = {
+		{"", "default:clay_lump", "dye:pink"},
+		{"", "group:stick", "default:clay_lump"},
+		{"group:stick", "", ""}
+	}
+})
+
+minetest.register_craft({
 	output = "babycrafter:wood_block 4",
 	recipe = {
 		{"group:wood", "group:wood"},
@@ -713,9 +1322,9 @@ minetest.register_craft({
 minetest.register_craft({
 	output = "babycrafter:blue_circle",
 	recipe = {
-		{"dye:blue", "dye:blue", "dye:blue"},
+		{"", "dye:blue", ""},
 		{"dye:blue", "default:clay_lump", "dye:blue"},
-		{"dye:blue", "dye:blue", "dye:blue"}
+		{"", "dye:blue", ""}
 	}
 })
 
@@ -724,16 +1333,16 @@ minetest.register_craft({
 	recipe = {
 		{"", "dye:green", ""},
 		{"", "default:clay_lump", ""},
-		{"dye:green", "", "dye:green"}
+		{"dye:green", "dye:green", "dye:green"}
 	}
 })
 
 minetest.register_craft({
 	output = "babycrafter:yellow_star",
 	recipe = {
-		{"", "dye:yellow", ""},
-		{"dye:yellow", "default:clay_lump", "dye:yellow"},
-		{"dye:yellow", "", "dye:yellow"}
+		{"default:clay_lump", "dye:yellow", "dye:yellow"},
+		{"dye:yellow", "", ""},
+		{"dye:yellow", "", ""}
 	}
 })
 
