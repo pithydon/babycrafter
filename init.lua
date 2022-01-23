@@ -482,8 +482,7 @@ for i=0,15 do
 					param2 = 0
 				end
 			end
-			local face_pos = minetest.pointed_thing_to_face_pos(placer, pointed_thing).y % 1
-			if under.y > above.y or (under.y == above.y and face_pos < 0.5) then
+			if under.y > above.y or (under.y == above.y and minetest.pointed_thing_to_face_pos(placer, pointed_thing).y % 1 < 0.5) then
 				if param2 == 0 then
 					param2 = 8
 				elseif param2 == 1 then
